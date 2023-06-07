@@ -180,6 +180,18 @@ void Session::closeTerminal(int terminalId)
     cleanup(terminalId);
 }
 
+void Session::focusFirstTerminal()
+{
+    m_terminals[m_orderedTerminalIds.front()]->terminalWidget()->setFocus();
+    setActiveTerminal(m_orderedTerminalIds.front());
+}
+
+void Session::focusLastTerminal()
+{
+    m_terminals[m_orderedTerminalIds.back()]->terminalWidget()->setFocus();
+    setActiveTerminal(m_orderedTerminalIds.back());
+}
+
 void Session::focusPreviousTerminal()
 {
     if (m_activeTerminalId == -1)

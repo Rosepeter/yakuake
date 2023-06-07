@@ -58,6 +58,8 @@ public Q_SLOTS:
 Q_SIGNALS:
     void newTabRequested();
     void tabSelected(int sessionId);
+    void tabSelectedPrevious(int sessionId);
+    void tabSelectedNext(int sessionId);
     void tabClosed(int sessionId);
 
     void requestTerminalHighlight(int terminalId);

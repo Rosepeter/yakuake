@@ -6,6 +6,7 @@
 */
 
 #include "sessionstack.h"
+#include "session.h"
 #include "settings.h"
 #include "terminal.h"
 #include "visualeventoverlay.h"
@@ -127,6 +128,26 @@ void SessionStack::raiseSession(int sessionId)
     Q_EMIT sessionRaised(sessionId);
 
     Q_EMIT activeTitleChanged(session->title());
+}
+
+void SessionStack::raiseSessionPrevious(int sessionId)
+{
+    raiseSession(sessionId);
+
+    if (sessionId == m_activeSessionId) {
+        Session *session = m_sessions.value(sessionId);
+        session->focusLastTerminal();
+    }
+}
+
+void SessionStack::raiseSessionNext(int sessionId)
+{
+    raiseSession(sessionId);
+
+    if (sessionId == m_activeSessionId) {
+        Session *session = m_sessions.value(sessionId);
+        session->focusFirstTerminal();
+    }
 }
 
 void SessionStack::removeSession(int sessionId)

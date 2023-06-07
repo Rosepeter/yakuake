@@ -48,6 +48,8 @@ public Q_SLOTS:
     Q_SCRIPTABLE int addSessionQuad();
 
     Q_SCRIPTABLE void raiseSession(int sessionId);
+    Q_SCRIPTABLE void raiseSessionNext(int sessionId);
+    Q_SCRIPTABLE void raiseSessionPrevious(int sessionId);
 
     Q_SCRIPTABLE void removeSession(int sessionId);
     Q_SCRIPTABLE void removeTerminal(int terminalId);

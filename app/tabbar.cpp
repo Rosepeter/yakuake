@@ -797,7 +797,23 @@ void TabBar::selectNextTab()
     else
         newSelectedSessionId = m_tabs.at(index + 1);
 
-    Q_EMIT tabSelected(newSelectedSessionId);
+    if (Settings::useNextSessionForNextTerminal()) {
+        SessionStack *sessionStack = m_mainWindow->sessionStack();
+        QStringList terminalIds = sessionStack->terminalIdsForSessionId(m_selectedSessionId).split(QLatin1Char(','), Qt::SkipEmptyParts);
+
+        if (terminalIds.count() > 1) {
+            QString lastTerminalId = terminalIds.at(terminalIds.count() - 1);
+            int activeTerminalId = sessionStack->activeTerminalId();
+
+            if (lastTerminalId != QString::number(activeTerminalId)) {
+                sessionStack->nextTerminal();
+                return;
+            }
+        }
+
+        Q_EMIT tabSelectedNext(newSelectedSessionId);
+    } else
+        Q_EMIT tabSelected(newSelectedSessionId);
 }
 
 void TabBar::selectPreviousTab()
@@ -812,7 +828,23 @@ void TabBar::selectPreviousTab()
     else
         newSelectedSessionId = m_tabs.at(index - 1);
 
-    Q_EMIT tabSelected(newSelectedSessionId);
+    if (Settings::useNextSessionForNextTerminal()) {
+        SessionStack *sessionStack = m_mainWindow->sessionStack();
+        QStringList terminalIds = sessionStack->terminalIdsForSessionId(m_selectedSessionId).split(QLatin1Char(','), Qt::SkipEmptyParts);
+
+        if (terminalIds.count() > 1) {
+            QString lastTerminalId = terminalIds.at(0);
+            int activeTerminalId = sessionStack->activeTerminalId();
+
+            if (lastTerminalId != QString::number(activeTerminalId)) {
+                sessionStack->previousTerminal();
+                return;
+            }
+        }
+
+        Q_EMIT tabSelectedPrevious(newSelectedSessionId);
+    } else
+        Q_EMIT tabSelected(newSelectedSessionId);
 }
 
 void TabBar::moveTabLeft(int sessionId)

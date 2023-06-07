@@ -95,6 +95,8 @@ public:
 public Q_SLOTS:
     void closeTerminal(int terminalId = -1);
 
+    void focusFirstTerminal();
+    void focusLastTerminal();
     void focusNextTerminal();
     void focusPreviousTerminal();
 

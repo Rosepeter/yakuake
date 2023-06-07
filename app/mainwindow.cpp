@@ -105,6 +105,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_tabBar, SIGNAL(lastTabClosed()), m_tabBar, SIGNAL(newTabRequested()));
     connect(m_tabBar, SIGNAL(lastTabClosed()), this, SLOT(handleLastTabClosed()));
     connect(m_tabBar, SIGNAL(tabSelected(int)), m_sessionStack, SLOT(raiseSession(int)));
+    connect(m_tabBar, SIGNAL(tabSelectedNext(int)), m_sessionStack, SLOT(raiseSessionNext(int)));
+    connect(m_tabBar, SIGNAL(tabSelectedPrevious(int)), m_sessionStack, SLOT(raiseSessionPrevious(int)));
     connect(m_tabBar, SIGNAL(tabClosed(int)), m_sessionStack, SLOT(removeSession(int)));
     connect(m_tabBar, &TabBar::tabTitleEdited, m_sessionStack, [&](int, QString) {
         m_sessionStack->raiseSession(m_sessionStack->activeSessionId());
