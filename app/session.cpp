@@ -150,8 +150,14 @@ Terminal *Session::addTerminal(QWidget *parent, QString workingDir)
     connect(terminal.get(), &Terminal::closeRequested, this, QOverload<int>::of(&Session::cleanup));
 
     Terminal *term = terminal.get();
+    int terminalId = terminal->id();
 
-    m_terminals[terminal->id()] = std::move(terminal);
+    m_terminals[terminalId] = std::move(terminal);
+    std::vector<int>::iterator pos = std::find(m_orderedTerminalIds.begin(), m_orderedTerminalIds.end(), m_activeTerminalId);
+    if (pos != m_orderedTerminalIds.end())
+        m_orderedTerminalIds.insert(std::next(pos), terminalId);
+    else
+        m_orderedTerminalIds.push_back(terminalId);
 
     Q_EMIT wantsBlurChanged();
 
@@ -181,19 +187,19 @@ void Session::focusPreviousTerminal()
     if (!m_terminals.contains(m_activeTerminalId))
         return;
 
-    std::map<int, std::unique_ptr<Terminal>>::iterator currentTerminal = m_terminals.find(m_activeTerminalId);
+    std::vector<int>::iterator current = std::find(m_orderedTerminalIds.begin(), m_orderedTerminalIds.end(), m_activeTerminalId);
+    std::vector<int>::iterator prev;
 
-    std::map<int, std::unique_ptr<Terminal>>::iterator previousTerminal;
-
-    if (currentTerminal == m_terminals.begin()) {
-        previousTerminal = std::prev(m_terminals.end());
+    if (m_orderedTerminalIds.begin() == current) {
+        prev = std::prev(m_orderedTerminalIds.end());
     } else {
-        previousTerminal = std::prev(currentTerminal);
+        prev = std::prev(current);
     }
 
-    QWidget *terminalWidget = previousTerminal->second->terminalWidget();
+    QWidget *terminalWidget = m_terminals[*prev]->terminalWidget();
     if (terminalWidget) {
         terminalWidget->setFocus();
+        setActiveTerminal(m_terminals[*prev]->id());
     }
 }
 
@@ -204,17 +210,18 @@ void Session::focusNextTerminal()
     if (!m_terminals.contains(m_activeTerminalId))
         return;
 
-    std::map<int, std::unique_ptr<Terminal>>::iterator currentTerminal = m_terminals.find(m_activeTerminalId);
+    std::vector<int>::iterator current = std::find(m_orderedTerminalIds.begin(), m_orderedTerminalIds.end(), m_activeTerminalId);
+    std::vector<int>::iterator next;
 
-    std::map<int, std::unique_ptr<Terminal>>::iterator nextTerminal = std::next(currentTerminal);
+    if (m_orderedTerminalIds.end() == current)
+        next = m_orderedTerminalIds.begin();
+    else
+        next = std::next(current);
 
-    if (nextTerminal == m_terminals.end()) {
-        nextTerminal = m_terminals.begin();
-    }
-
-    QWidget *terminalWidget = nextTerminal->second->terminalWidget();
+    QWidget *terminalWidget = m_terminals[*next]->terminalWidget();
     if (terminalWidget) {
         terminalWidget->setFocus();
+        setActiveTerminal(m_terminals[*next]->id());
     }
 }
 
@@ -365,6 +372,9 @@ void Session::cleanup(int terminalId)
         focusPreviousTerminal();
 
     m_terminals.erase(terminalId);
+    std::vector<int>::iterator pos = std::find(m_orderedTerminalIds.begin(), m_orderedTerminalIds.end(), terminalId);
+    if (m_orderedTerminalIds.end() != pos)
+        m_orderedTerminalIds.erase(pos);
     Q_EMIT wantsBlurChanged();
 
     cleanup();
@@ -391,7 +401,7 @@ void Session::prepareShutdown()
 const QString Session::terminalIdList()
 {
     QStringList idList;
-    for (auto &[id, terminal] : m_terminals) {
+    for (int id : m_orderedTerminalIds) {
         idList << QString::number(id);
     }
 

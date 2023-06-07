@@ -143,6 +143,12 @@ private:
     int m_activeTerminalId;
     std::map<int, std::unique_ptr<Terminal>> m_terminals;
 
+    // This vector helps to keep track of the "visible" order of terminals
+    // within a session. Whenever a new terminal is created its id is added
+    // after the id of the current terminal. So, this vector holds the ids of
+    // the terminals in the order from left to right and from top to bottom.
+    std::vector<int> m_orderedTerminalIds;
+
     QString m_title;
 
     bool m_closable;
